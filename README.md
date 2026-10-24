@@ -30,7 +30,7 @@ Many students in Cypress, Texas walk to school, the bus stop or after-school job
 ## Built with
 
 - Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- Leaflet / react-leaflet with OpenStreetMap tiles
+- Leaflet / react-leaflet with Esri's World Dark Gray basemap (keyless)
 - Supabase (Postgres + row-level security) for shared reports
 - Shared reports live in a Supabase project (the live site is connected). Without keys, the app falls back to demo mode with browser-local storage
 

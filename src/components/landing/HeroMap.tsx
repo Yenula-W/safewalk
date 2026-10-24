@@ -5,6 +5,7 @@ import L from "leaflet";
 import { useEffect } from "react";
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import { gsap } from "@/lib/gsap";
+import { DARK_TILES } from "@/lib/tiles";
 
 const CENTER: [number, number] = [29.691, -95.697];
 
@@ -62,11 +63,8 @@ export default function HeroMap() {
       attributionControl
       className="dark-map hero-map h-full w-full bg-background"
     >
-      {/* Standard OSM tiles, inverted to dark in CSS: no API key needed. */}
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer attribution={DARK_TILES.attribution} url={DARK_TILES.base} maxNativeZoom={16} maxZoom={19} />
+      <TileLayer url={DARK_TILES.labels} maxNativeZoom={16} maxZoom={19} opacity={0.9} />
       {PINS.map((p, i) => (
         <Marker key={i} position={p.pos} icon={pinIcon(p.color)} interactive={false} />
       ))}

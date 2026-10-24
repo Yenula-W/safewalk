@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
+import { DARK_TILES } from "@/lib/tiles";
 import { CATEGORY_LABELS, SEVERITY_COLOR, type LatLng, type Report } from "@/lib/types";
 
 const YELLOW = "oklch(0.9 0.19 98)";
@@ -29,9 +30,9 @@ export default function SafeMap({ center, reports, pending, route, focus, onPick
       [initialCenter.current.lat, initialCenter.current.lng], 15
     );
     mapRef.current = map;
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
+    // Esri's dark canvas needs no API key and isn't rate-limited like tile.openstreetmap.org.
+    L.tileLayer(DARK_TILES.base, { attribution: DARK_TILES.attribution, maxNativeZoom: 16, maxZoom: 19 }).addTo(map);
+    L.tileLayer(DARK_TILES.labels, { maxNativeZoom: 16, maxZoom: 19, pane: "overlayPane", opacity: 0.9 }).addTo(map);
     const resize = new ResizeObserver(() => map.invalidateSize());
     resize.observe(container.current);
     return () => {

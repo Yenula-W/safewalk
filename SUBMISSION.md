@@ -47,11 +47,11 @@ Suggested shape:
 
 ## What we built it with
 
-Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Leaflet + react-leaflet with OpenStreetMap tiles (inverted to dark in CSS, no API key) · Supabase (Postgres, row-level security) · GSAP + ScrollTrigger and Lenis for the landing page motion · Skiper UI components (sticky card stack, text roll, progressive blur) · Vercel for hosting with deploy-on-push.
+Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Leaflet + react-leaflet with Esri's World Dark Gray basemap (no API key) · Supabase (Postgres, row-level security) · GSAP + ScrollTrigger and Lenis for the landing page motion · Skiper UI components (sticky card stack, text roll, progressive blur) · Vercel for hosting with deploy-on-push.
 
 ## Challenges we ran into
 
-- CARTO's dark basemap now requires an API key, so the dark map is standard OSM tiles run through a CSS `invert + hue-rotate` filter instead.
+- Basemaps were a saga: CARTO's dark tiles now need an API key, and tile.openstreetmap.org began answering HTTP 429 for the deployed site. We settled on Esri's keyless World Dark Gray canvas.
 - Vercel refused the first deploy because Next 15.5.4 had a published vulnerability; upgrading to 15.5.28 fixed it.
 - GSAP's pinned ScrollTrigger inside a fixed-height container silently overflowed instead of pushing the next section down; the stack wrapper had to size itself.
 - Leaflet touches `window` on import, so every map component is loaded client-side only with `next/dynamic`.

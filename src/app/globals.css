@@ -204,9 +204,9 @@
   100% { transform: scale(1.8); opacity: 0; }
 }
 
-/* Turn standard OSM tiles into a muted dark basemap. */
+/* Esri's dark canvas is already dark; just sink it toward the page background. */
 .dark-map .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) grayscale(0.55) brightness(0.62) contrast(1.05);
+  filter: brightness(0.72) contrast(1.08) saturate(0.8);
 }
 .dark-map .leaflet-control-attribution {
   background: transparent;
