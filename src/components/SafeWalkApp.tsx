@@ -208,7 +208,7 @@ export default function SafeWalkApp() {
                 {s}
               </span>
             ))}
-            <span className="ml-auto">{reports.length} reports</span>
+            <span className="ml-auto">{reports.length} report{reports.length === 1 ? "" : "s"}</span>
           </div>
           <p className="text-[11px] text-white/35">In danger? Call 911.</p>
         </div>
