@@ -5,6 +5,7 @@
 Built for [Neighborhood Hacks](https://neighborhoodhacks.org/), Safety & Emergency Response track.
 
 **Live:** https://safewalk-rho.vercel.app (landing page; the map is at `/app`)
+**Devpost draft and requirements checklist:** [SUBMISSION.md](SUBMISSION.md)
 
 ## The problem
 
@@ -21,7 +22,8 @@ Many students in Cypress, Texas walk to school, the bus stop or after-school job
 
 ## What it does
 
-- **Report a spot:** tap the map, choose a category (lighting, crossing, sidewalk, traffic, feels unsafe), rate severity 1–5 and add an optional short note.
+- **Report a spot:** tap the map, choose one of 11 hazard types (poor lighting, unsafe crossing, sidewalk ends, heavy traffic, speeding cars, loose dogs, flooding/ditch, construction, isolated stretch, feels unsafe, other), rate severity 1–5 and add an optional short note.
+- **Use my location:** one tap centres the map on you, so you can report while you walk.
 - **Check my route:** tap a start and a destination to get a 0–100 score based on reports within 80 m of the path. Recent and severe reports count more.
 - **Privacy by design:** no accounts and no names. Notes are capped at 280 characters, and the app tells users not to include personal details.
 

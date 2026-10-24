@@ -60,7 +60,7 @@ export default function HeroMap() {
       touchZoom={false}
       keyboard={false}
       attributionControl
-      className="hero-map h-full w-full bg-background"
+      className="dark-map hero-map h-full w-full bg-background"
     >
       {/* Standard OSM tiles, inverted to dark in CSS: no API key needed. */}
       <TileLayer

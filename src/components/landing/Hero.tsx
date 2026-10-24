@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRef } from "react";
 import { EASE, gsap, useGSAP } from "@/lib/gsap";
+import Magnetic from "./Magnetic";
 
 const HeroMap = dynamic(() => import("./HeroMap"), {
   ssr: false,
@@ -52,12 +53,14 @@ export default function Hero() {
           <p className="max-w-xs text-sm uppercase tracking-[0.22em] text-white/80 md:max-w-none">
             Know the walk before you take it
           </p>
-          <Link
-            href="/app"
-            className="rounded-full bg-signal px-7 py-3 text-xs font-medium uppercase tracking-[0.2em] text-black transition-transform hover:scale-[1.04] active:scale-[0.98]"
-          >
-            Open the map
-          </Link>
+          <Magnetic>
+            <Link
+              href="/app"
+              className="block rounded-full bg-signal px-7 py-3 text-xs font-medium uppercase tracking-[0.2em] text-black active:scale-[0.98]"
+            >
+              Open the map
+            </Link>
+          </Magnetic>
         </div>
       </div>
     </section>

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Anton, Geist, Geist_Mono } from "next/font/google";
+import { Big_Shoulders, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -12,10 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const anton = Anton({
-  variable: "--font-anton",
+const bigShoulders = Big_Shoulders({
+  variable: "--font-big-shoulders",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -31,9 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} antialiased`}
-      >
+      <body className={`${spaceGrotesk.variable} ${geistMono.variable} ${bigShoulders.variable} antialiased`}>
         {children}
       </body>
     </html>
