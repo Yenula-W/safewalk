@@ -16,6 +16,8 @@ const bigShoulders = Big_Shoulders({
   variable: "--font-big-shoulders",
   subsets: ["latin"],
   weight: ["700", "900"],
+  // next/font has no fallback metrics for this family; it only ever renders at display size.
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
