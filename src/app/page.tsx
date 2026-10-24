@@ -1,5 +1,5 @@
-import SafeWalkApp from "@/components/SafeWalkApp";
+import Landing from "@/components/landing/Landing";
 
 export default function Home() {
-  return <SafeWalkApp />;
+  return <Landing />;
 }
