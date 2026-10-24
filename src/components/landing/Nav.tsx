@@ -5,37 +5,33 @@ import { ProgressiveBlur } from "@/components/ui/skiper-ui/skiper41";
 import { TextRoll } from "@/components/ui/skiper-ui/skiper58";
 
 const links = [
-  { label: "Problem", href: "#problem" },
-  { label: "Product", href: "#product" },
-  { label: "How it works", href: "#how" },
+  { label: "Report", href: "#report" },
+  { label: "Score", href: "#score" },
+  { label: "Code", href: "https://github.com/Yenula-W/safewalk" },
 ];
 
 export default function Nav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <ProgressiveBlur position="top" backgroundColor="oklch(0.13 0.004 270)" height="100%" blurAmount="10px" className="-z-10" />
-      <div className="relative mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
-        <Link href="/" className="flex items-center gap-2.5 text-sm font-medium tracking-tight">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inset-0 rounded-full bg-signal blur-[3px]" />
-            <span className="absolute inset-0 rounded-full bg-signal" />
-          </span>
+    <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
+      <ProgressiveBlur position="top" backgroundColor="transparent" height="100%" blurAmount="6px" className="-z-10" />
+      <div className="relative mx-auto flex max-w-[1400px] items-center justify-between px-5 py-5 md:px-10">
+        <Link href="/" className="display text-xl text-white">
           SafeWalk
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-10 md:flex" aria-label="Primary">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm text-foreground/60 transition-colors hover:text-foreground">
-              <TextRoll className="text-sm">{l.label}</TextRoll>
+            <a key={l.href} href={l.href} className="text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white">
+              <TextRoll className="text-xs">{l.label}</TextRoll>
             </a>
           ))}
         </nav>
 
         <Link
           href="/app"
-          className="rounded-full border border-hairline bg-foreground/[0.04] px-4 py-1.5 text-sm font-medium backdrop-blur transition-colors hover:bg-foreground/[0.08]"
+          className="rounded-full border border-white/40 px-4 py-1.5 text-xs uppercase tracking-[0.18em] text-white transition-colors hover:bg-white hover:text-black"
         >
-          Open the map
+          Open map
         </Link>
       </div>
     </header>

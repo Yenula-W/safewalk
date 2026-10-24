@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-instrument-serif);
+  --font-display: var(--font-anton);
   --font-heading: var(--font-sans);
   --color-signal: var(--signal);
   --color-hairline: var(--hairline);
@@ -78,8 +78,8 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  /* The one accent: streetlight amber. */
-  --signal: oklch(0.84 0.16 82);
+  /* The one accent: safety yellow, used as big colour blocks. */
+  --signal: oklch(0.9 0.19 98);
   --hairline: oklch(0 0 0 / 10%);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -147,6 +147,15 @@ body {
 .landing ::selection {
   background: var(--signal);
   color: #000;
+}
+.display {
+  font-family: var(--font-display), Impact, sans-serif;
+  text-transform: uppercase;
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+}
+.pin-scene {
+  will-change: transform;
 }
 
 /* Hero map pins: a dot with a slow pulse ring. */
