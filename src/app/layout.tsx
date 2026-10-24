@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
-import { Big_Shoulders, Geist_Mono, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+// Self-host the existing Latin fonts so CI builds do not depend on Google Fonts.
+const spaceGrotesk = localFont({
+  src: "./fonts/space-grotesk.woff2",
   variable: "--font-space-grotesk",
-  subsets: ["latin"],
+  weight: "300 700",
+  display: "swap",
 });
-
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/geist-mono.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
-
-const bigShoulders = Big_Shoulders({
+const bigShoulders = localFont({
+  src: "./fonts/big-shoulders.woff2",
   variable: "--font-big-shoulders",
-  subsets: ["latin"],
-  weight: ["700", "900"],
-  // next/font has no fallback metrics for this family; it only ever renders at display size.
+  weight: "700 900",
+  display: "swap",
   adjustFontFallback: false,
 });
 
