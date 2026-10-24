@@ -13,7 +13,7 @@ export default function Score() {
       const el = root.current?.querySelector<HTMLElement>("[data-big]");
       gsap
         .timeline({
-          scrollTrigger: { trigger: root.current, start: "top top", end: "+=150%", pin: true, scrub: 0.8 },
+          scrollTrigger: { trigger: root.current, start: "top top", end: "+=240%", pin: true, scrub: 0.8 },
         })
         .to(num, {
           v: 52,
