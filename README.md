@@ -32,7 +32,7 @@ Many students in Cypress, Texas walk to school, the bus stop or after-school job
 - Next.js 15 (App Router) + TypeScript + Tailwind CSS
 - Leaflet / react-leaflet with OpenStreetMap tiles
 - Supabase (Postgres + row-level security) for shared reports
-- Demo mode: without Supabase keys, reports are stored in the browser so the app works out of the box
+- Shared reports live in a Supabase project (the live site is connected). Without keys, the app falls back to demo mode with browser-local storage
 
 ## Run it
 

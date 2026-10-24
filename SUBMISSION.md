@@ -43,7 +43,7 @@ Suggested shape:
 - **Check my route.** Tap a start and a destination. SafeWalk finds every report within 80 m of the straight line and scores the route 0–100. Each report costs `severity × 4` points, scaled by recency (full weight under 30 days, 0.7 under 180 days, 0.4 after). ≥75 "Looks clear", 45–74 "Use caution", below 45 "Risky".
 - **Use my location** centres the map on you so reporting on the walk itself is one tap.
 - **Privacy by design.** No accounts, names or emails; notes are capped and the UI asks for no personal details. Reports are anonymous points.
-- **Shared data.** With Supabase connected, every report is visible to everyone. Without it the app runs in demo mode with browser-local storage, so it works out of the box.
+- **Shared data.** The live site is connected to Supabase, so every report anyone adds is visible to everyone, protected by row-level security (anyone can read and insert, nobody can edit or delete from the client). Without keys the app falls back to a browser-local demo mode.
 
 ## What we built it with
 
