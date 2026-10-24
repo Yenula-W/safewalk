@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { assessRoute } from "@/lib/safety";
-import { addReport, isDemoMode, loadReports } from "@/lib/store";
+import { addReport, isDemoMode, isSample, loadReports } from "@/lib/store";
 import { CATEGORIES, CATEGORY_LABELS, SEVERITY_COLOR, type Category, type LatLng, type Report } from "@/lib/types";
 
 const SafeMap = dynamic(() => import("./SafeMap"), {
@@ -111,11 +111,15 @@ export default function SafeWalkApp() {
           </Link>
         </header>
 
-        {isDemoMode && (
+        {isDemoMode ? (
           <p className="rounded-lg border border-signal/30 bg-signal/10 px-3 py-2 text-xs text-signal">
             Demo mode: reports stay in this browser. Pins marked [sample] are placeholders.
           </p>
-        )}
+        ) : reports.some(isSample) ? (
+          <p className="rounded-lg border border-signal/30 bg-signal/10 px-3 py-2 text-xs text-signal">
+            No reports yet. Pins marked [sample] are placeholders; yours will be the first real one.
+          </p>
+        ) : null}
 
         <div className="flex gap-2">{tab("report", "Report a spot")}{tab("route", "Check my route")}</div>
 
@@ -208,7 +212,9 @@ export default function SafeWalkApp() {
                 {s}
               </span>
             ))}
-            <span className="ml-auto">{reports.length} report{reports.length === 1 ? "" : "s"}</span>
+            <span className="ml-auto">
+              {reports.filter((r) => !isSample(r)).length} report{reports.filter((r) => !isSample(r)).length === 1 ? "" : "s"}
+            </span>
           </div>
           <p className="text-[11px] text-white/35">In danger? Call 911.</p>
         </div>

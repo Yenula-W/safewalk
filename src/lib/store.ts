@@ -7,6 +7,8 @@ const supabase = url && key ? createClient(url, key) : null;
 
 export const isDemoMode = !supabase;
 
+export const isSample = (r: Report) => r.id.startsWith("sample-");
+
 const LS_KEY = "safewalk-demo-reports";
 const lat0 = Number(process.env.NEXT_PUBLIC_MAP_LAT ?? 29.691);
 const lng0 = Number(process.env.NEXT_PUBLIC_MAP_LNG ?? -95.697);
@@ -29,7 +31,8 @@ export async function loadReports(): Promise<Report[]> {
     const { data, error } = await supabase
       .from("reports").select("*").order("created_at", { ascending: false }).limit(500);
     if (error) throw error;
-    return data as Report[];
+    // An empty shared map is confusing, so show clearly labelled placeholders until the first real report.
+    return data.length ? (data as Report[]) : sampleReports();
   }
   try {
     const raw = localStorage.getItem(LS_KEY);

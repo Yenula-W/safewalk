@@ -1,12 +1,10 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import { useEffect, useRef } from "react";
-import { DARK_TILES } from "@/lib/tiles";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { setWorkerUrl, Map as MapLibreMap, NavigationControl, Popup, type GeoJSONSource, type MapMouseEvent } from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
+import { DARK_STYLE, YELLOW } from "@/lib/tiles";
 import { CATEGORY_LABELS, SEVERITY_COLOR, type LatLng, type Report } from "@/lib/types";
-
-const YELLOW = "oklch(0.9 0.19 98)";
 
 interface Props {
   center: LatLng;
@@ -17,81 +15,177 @@ interface Props {
   onPick: (p: LatLng) => void;
 }
 
+const EMPTY: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+
+function reportsToGeoJSON(reports: Report[]): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: reports.map((r) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [r.lng, r.lat] },
+      properties: {
+        id: r.id,
+        label: CATEGORY_LABELS[r.category],
+        severity: r.severity,
+        color: SEVERITY_COLOR[r.severity],
+        note: r.note,
+        date: new Date(r.created_at).toLocaleDateString(),
+      },
+    })),
+  };
+}
+
+function overlayToGeoJSON(pending: LatLng | null, route: Props["route"], focus: LatLng | null): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = [];
+  const point = (p: LatLng, props: Record<string, unknown>): GeoJSON.Feature => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+    properties: props,
+  });
+  if (pending) features.push(point(pending, { r: 11, color: YELLOW, fill: 0.25 }));
+  if (route.a) features.push(point(route.a, { r: 7, color: "#ffffff", fill: 1 }));
+  if (route.b) features.push(point(route.b, { r: 7, color: YELLOW, fill: 1 }));
+  if (route.a && route.b) {
+    features.push({
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: [[route.a.lng, route.a.lat], [route.b.lng, route.b.lat]] },
+      properties: {},
+    });
+  }
+  if (focus) features.push(point(focus, { r: 6, color: "#60a5fa", fill: 0.9 }));
+  return { type: "FeatureCollection", features };
+}
+
+/** Builds a popup body from untrusted report text without innerHTML. */
+function popupContent(p: Record<string, string>) {
+  const root = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = p.label;
+  root.append(title, ` · severity ${p.severity}/5`);
+  if (p.note) {
+    const note = document.createElement("div");
+    note.className = "mt-1 opacity-80";
+    note.textContent = p.note;
+    root.append(note);
+  }
+  const date = document.createElement("div");
+  date.className = "mt-1 text-xs opacity-50";
+  date.textContent = p.date;
+  root.append(date);
+  return root;
+}
+
 export default function SafeMap({ center, reports, pending, route, focus, onPick }: Props) {
   const container = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const initialCenter = useRef(center);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const onPickRef = useRef(onPick);
+  const [ready, setReady] = useState(false);
 
-  // Each effect setup owns a fresh map. Strict Mode and Fast Refresh may run
-  // setup/cleanup again; never reuse the instance that cleanup has removed.
+  useEffect(() => {
+    onPickRef.current = onPick;
+  }, [onPick]);
+
+  // One map per mount; Strict Mode runs this twice and the cleanup removes the first.
   useEffect(() => {
     if (!container.current) return;
-    const map = L.map(container.current).setView(
-      [initialCenter.current.lat, initialCenter.current.lng], 15
-    );
+    setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+    const map = new MapLibreMap({
+      container: container.current,
+      style: DARK_STYLE,
+      center: [center.lng, center.lat],
+      zoom: 14.6,
+      attributionControl: { compact: true },
+    });
     mapRef.current = map;
-    // Esri's dark canvas needs no API key and isn't rate-limited like tile.openstreetmap.org.
-    L.tileLayer(DARK_TILES.base, { attribution: DARK_TILES.attribution, maxNativeZoom: 16, maxZoom: 19 }).addTo(map);
-    L.tileLayer(DARK_TILES.labels, { maxNativeZoom: 16, maxZoom: 19, pane: "overlayPane", opacity: 0.9 }).addTo(map);
-    const resize = new ResizeObserver(() => map.invalidateSize());
+    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+
+    map.on("load", () => {
+      map.addSource("reports", { type: "geojson", data: EMPTY });
+      map.addLayer({
+        id: "reports-halo",
+        type: "circle",
+        source: "reports",
+        paint: {
+          "circle-radius": ["+", 9, ["*", ["get", "severity"], 3]],
+          "circle-color": ["get", "color"],
+          "circle-opacity": 0.22,
+        },
+      });
+      map.addLayer({
+        id: "reports",
+        type: "circle",
+        source: "reports",
+        paint: {
+          "circle-radius": ["+", 4, ["*", ["get", "severity"], 1.4]],
+          "circle-color": ["get", "color"],
+          "circle-stroke-color": "#0b0b0c",
+          "circle-stroke-width": 1.5,
+        },
+      });
+      map.addSource("overlay", { type: "geojson", data: EMPTY });
+      map.addLayer({
+        id: "route-line",
+        type: "line",
+        source: "overlay",
+        filter: ["==", "$type", "LineString"],
+        layout: { "line-cap": "round" },
+        paint: { "line-color": YELLOW, "line-width": 3, "line-dasharray": [1.5, 2] },
+      });
+      map.addLayer({
+        id: "overlay-points",
+        type: "circle",
+        source: "overlay",
+        filter: ["==", "$type", "Point"],
+        paint: {
+          "circle-radius": ["get", "r"],
+          "circle-color": ["get", "color"],
+          "circle-opacity": ["get", "fill"],
+          "circle-stroke-color": ["get", "color"],
+          "circle-stroke-width": 2,
+        },
+      });
+
+      map.on("mouseenter", "reports", () => (map.getCanvas().style.cursor = "pointer"));
+      map.on("mouseleave", "reports", () => (map.getCanvas().style.cursor = ""));
+      map.on("click", (e: MapMouseEvent) => {
+        const hit = map.queryRenderedFeatures(e.point, { layers: ["reports"] })[0];
+        if (hit) {
+          const [lng, lat] = (hit.geometry as GeoJSON.Point).coordinates;
+          new Popup({ closeButton: false, offset: 14, className: "sw-popup" })
+            .setLngLat([lng, lat])
+            .setDOMContent(popupContent(hit.properties as Record<string, string>))
+            .addTo(map);
+          return;
+        }
+        onPickRef.current({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      });
+      setReady(true);
+    });
+
+    const resize = new ResizeObserver(() => map.resize());
     resize.observe(container.current);
     return () => {
       resize.disconnect();
       map.remove();
       mapRef.current = null;
+      setReady(false);
     };
+    // The initial centre is only read once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const click = (event: L.LeafletMouseEvent) => onPick({ lat: event.latlng.lat, lng: event.latlng.lng });
-    map.on("click", click);
-    return () => { map.off("click", click); };
-  }, [onPick]);
+    if (!ready) return;
+    (mapRef.current?.getSource("reports") as GeoJSONSource | undefined)?.setData(reportsToGeoJSON(reports));
+  }, [reports, ready]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const layers = L.layerGroup().addTo(map);
-    for (const report of reports) {
-      const popup = document.createElement("div");
-      const title = document.createElement("strong");
-      title.textContent = CATEGORY_LABELS[report.category];
-      popup.append(title, ` · severity ${report.severity}/5`);
-      if (report.note) {
-        const note = document.createElement("div");
-        note.className = "mt-1 opacity-80";
-        note.textContent = report.note;
-        popup.append(note);
-      }
-      const date = document.createElement("div");
-      date.className = "mt-1 text-xs opacity-50";
-      date.textContent = new Date(report.created_at).toLocaleDateString();
-      popup.append(date);
-      L.circleMarker([report.lat, report.lng], {
-        radius: 6 + report.severity * 1.5,
-        color: SEVERITY_COLOR[report.severity],
-        fillColor: SEVERITY_COLOR[report.severity], fillOpacity: 0.55, weight: 2,
-      }).bindPopup(popup).addTo(layers);
-    }
-    return () => { layers.remove(); };
-  }, [reports]);
+    if (!ready) return;
+    (mapRef.current?.getSource("overlay") as GeoJSONSource | undefined)?.setData(overlayToGeoJSON(pending, route, focus));
+  }, [pending, route, focus, ready]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const layers = L.layerGroup().addTo(map);
-    if (pending) L.circleMarker([pending.lat, pending.lng], { radius: 10, color: YELLOW, fillColor: YELLOW, fillOpacity: 0.3, dashArray: "4" }).addTo(layers);
-    if (route.a) L.circleMarker([route.a.lat, route.a.lng], { radius: 8, color: "#fff", fillColor: "#fff", fillOpacity: 1 }).addTo(layers);
-    if (route.b) L.circleMarker([route.b.lat, route.b.lng], { radius: 8, color: YELLOW, fillColor: YELLOW, fillOpacity: 1 }).addTo(layers);
-    if (route.a && route.b) L.polyline([[route.a.lat, route.a.lng], [route.b.lat, route.b.lng]], { color: YELLOW, weight: 3, dashArray: "8 10", lineCap: "round" }).addTo(layers);
-    if (focus) L.circleMarker([focus.lat, focus.lng], { radius: 7, color: "#60a5fa", fillColor: "#60a5fa", fillOpacity: 0.9 }).addTo(layers);
-    return () => { layers.remove(); };
-  }, [pending, route, focus]);
-
-  useEffect(() => {
-    if (focus) mapRef.current?.flyTo([focus.lat, focus.lng], 16, { duration: 1.2 });
+    if (focus) mapRef.current?.flyTo({ center: [focus.lng, focus.lat], zoom: 16, duration: 1200 });
   }, [focus]);
 
   return <div ref={container} className="dark-map h-full w-full bg-background" />;

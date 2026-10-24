@@ -15,7 +15,7 @@ Copy each section into the matching Devpost field. Anything in **[brackets]** is
 | What you'd do next | ✅ below |
 | Demo video, 2–6 min, project working | ❌ to record — shot list below |
 | Public code repository | ✅ https://github.com/Yenula-W/safewalk |
-| Live demo (not required, helps judges) | ✅ https://safewalk-rho.vercel.app |
+| Live demo (not required, helps judges) | ✅ https://safewalk-rho.vercel.app, connected to the shared database |
 | Track | Safety & Emergency Response |
 
 ## Project name
@@ -47,14 +47,14 @@ Suggested shape:
 
 ## What we built it with
 
-Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Leaflet + react-leaflet with Esri's World Dark Gray basemap (no API key) · Supabase (Postgres, row-level security) · GSAP + ScrollTrigger and Lenis for the landing page motion · Skiper UI components (sticky card stack, text roll, progressive blur) · Vercel for hosting with deploy-on-push.
+Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · MapLibre GL with OpenFreeMap's dark vector tiles (crisp at any zoom, no API key) · Supabase (Postgres, row-level security) · GSAP + ScrollTrigger and Lenis for the landing page motion · Skiper UI components (sticky card stack, text roll, progressive blur) · Vercel for hosting with deploy-on-push.
 
 ## Challenges we ran into
 
-- Basemaps were a saga: CARTO's dark tiles now need an API key, and tile.openstreetmap.org began answering HTTP 429 for the deployed site. We settled on Esri's keyless World Dark Gray canvas.
+- Basemaps were a saga: CARTO's dark raster tiles now need an API key, tile.openstreetmap.org began answering HTTP 429 for the deployed site, and Esri's keyless dark canvas was blurry past zoom 16. We moved from Leaflet to MapLibre GL with OpenFreeMap's vector tiles, which are sharp at any zoom on any screen.
 - Vercel refused the first deploy because Next 15.5.4 had a published vulnerability; upgrading to 15.5.28 fixed it.
 - GSAP's pinned ScrollTrigger inside a fixed-height container silently overflowed instead of pushing the next section down; the stack wrapper had to size itself.
-- Leaflet touches `window` on import, so every map component is loaded client-side only with `next/dynamic`.
+- MapLibre touches `window` on import, so every map component is loaded client-side only with `next/dynamic`.
 - **[Add yours: e.g. getting students to answer the survey, deciding on the 80 m radius, scoring without real routing.]**
 
 ## What's next

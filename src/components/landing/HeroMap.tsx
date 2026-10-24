@@ -1,81 +1,92 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import { useEffect } from "react";
-import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { setWorkerUrl, Map as MapLibreMap, Marker, type GeoJSONSource } from "maplibre-gl";
+import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
-import { DARK_TILES } from "@/lib/tiles";
+import { DARK_STYLE, YELLOW } from "@/lib/tiles";
 
-const CENTER: [number, number] = [29.691, -95.697];
+const CENTER: [number, number] = [-95.697, 29.691];
 
 const PINS: { pos: [number, number]; color: string }[] = [
-  { pos: [29.693, -95.696], color: "#ea580c" },
-  { pos: [29.69, -95.694], color: "#dc2626" },
-  { pos: [29.6945, -95.699], color: "#ca8a04" },
+  { pos: [-95.696, 29.693], color: "#f97316" },
+  { pos: [-95.694, 29.69], color: "#ef4444" },
+  { pos: [-95.699, 29.6945], color: "#eab308" },
 ];
 
 const ROUTE: [number, number][] = [
-  [29.6955, -95.7005],
-  [29.6895, -95.6935],
+  [-95.7005, 29.6955],
+  [-95.6935, 29.6895],
 ];
 
-function pinIcon(color: string) {
-  return L.divIcon({
-    className: "hero-pin",
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
-    html: `<span class="ring" style="--c:${color}"></span><span class="dot" style="--c:${color}"></span>`,
-  });
+function pinElement(color: string) {
+  const el = document.createElement("div");
+  el.className = "hero-pin";
+  el.style.width = "12px";
+  el.style.height = "12px";
+  el.innerHTML = `<span class="ring" style="--c:${color}"></span><span class="dot" style="--c:${color}"></span>`;
+  return el;
 }
 
-/** Draws the route line once the SVG path exists. */
-function RouteDraw() {
-  const map = useMap();
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const path = map.getPane("overlayPane")?.querySelector<SVGPathElement>("path.hero-route");
-      if (!path) return;
-      const len = path.getTotalLength();
-      // fromTo renders the start state immediately, so the line is hidden until it draws.
-      gsap.fromTo(
-        path,
-        { strokeDasharray: len, strokeDashoffset: len },
-        { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut", delay: 0.9 }
-      );
-    });
-    return () => cancelAnimationFrame(id);
-  }, [map]);
-  return null;
-}
-
+/** Non-interactive, slightly tilted map; the route draws itself once the style loads. */
 export default function HeroMap() {
-  return (
-    <MapContainer
-      center={CENTER}
-      zoom={15}
-      zoomControl={false}
-      dragging={false}
-      scrollWheelZoom={false}
-      doubleClickZoom={false}
-      touchZoom={false}
-      keyboard={false}
-      attributionControl
-      className="dark-map hero-map h-full w-full bg-background"
-    >
-      <TileLayer attribution={DARK_TILES.attribution} url={DARK_TILES.base} maxNativeZoom={16} maxZoom={19} />
-      <TileLayer url={DARK_TILES.labels} maxNativeZoom={16} maxZoom={19} opacity={0.9} />
-      {PINS.map((p, i) => (
-        <Marker key={i} position={p.pos} icon={pinIcon(p.color)} interactive={false} />
-      ))}
-      <Polyline
-        positions={ROUTE}
-        pathOptions={{ className: "hero-route", color: "oklch(0.84 0.16 82)", weight: 2.5, lineCap: "round" }}
-      />
-      {ROUTE.map((p, i) => (
-        <Marker key={`r${i}`} position={p} icon={pinIcon(i === 0 ? "#f5f5f5" : "oklch(0.84 0.16 82)")} interactive={false} />
-      ))}
-      <RouteDraw />
-    </MapContainer>
-  );
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!container.current) return;
+    setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+    const map = new MapLibreMap({
+      container: container.current,
+      style: DARK_STYLE,
+      center: CENTER,
+      zoom: 14.4,
+      pitch: 38,
+      bearing: -12,
+      interactive: false,
+      attributionControl: { compact: true },
+    });
+
+    const markers: Marker[] = [];
+    let tween: gsap.core.Tween | null = null;
+
+    map.on("load", () => {
+      map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({
+        id: "route",
+        type: "line",
+        source: "route",
+        layout: { "line-cap": "round" },
+        paint: { "line-color": YELLOW, "line-width": 3 },
+      });
+
+      for (const p of PINS) markers.push(new Marker({ element: pinElement(p.color) }).setLngLat(p.pos).addTo(map));
+      markers.push(new Marker({ element: pinElement("#f5f5f5") }).setLngLat(ROUTE[0]).addTo(map));
+      markers.push(new Marker({ element: pinElement(YELLOW) }).setLngLat(ROUTE[1]).addTo(map));
+
+      // Draw the line by extending its end point from A towards B.
+      const src = map.getSource("route") as GeoJSONSource;
+      const progress = { t: 0 };
+      const [a, b] = ROUTE;
+      tween = gsap.to(progress, {
+        t: 1,
+        duration: 1.6,
+        delay: 0.9,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          const end: [number, number] = [a[0] + (b[0] - a[0]) * progress.t, a[1] + (b[1] - a[1]) * progress.t];
+          src.setData({ type: "Feature", geometry: { type: "LineString", coordinates: [a, end] }, properties: {} });
+        },
+      });
+    });
+
+    const resize = new ResizeObserver(() => map.resize());
+    resize.observe(container.current);
+    return () => {
+      tween?.kill();
+      resize.disconnect();
+      map.remove();
+    };
+  }, []);
+
+  return <div ref={container} className="dark-map hero-map h-full w-full bg-background" />;
 }

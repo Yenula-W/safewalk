@@ -24,6 +24,7 @@ const bigShoulders = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://safewalk-rho.vercel.app"),
   title: "SafeWalk — Know the walk before you take it",
   description:
     "Students in Cypress, TX flag dark corners, missing sidewalks and bad crossings. SafeWalk turns their reports into a route score anyone can check.",
