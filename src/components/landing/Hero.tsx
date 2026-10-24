@@ -26,7 +26,7 @@ export default function Hero() {
       // Scroll: pin the scene; the type blows up and fades while the map pushes in.
       gsap
         .timeline({
-          scrollTrigger: { trigger: root.current, start: "top top", end: "+=180%", pin: true, scrub: 0.6 },
+          scrollTrigger: { trigger: root.current, start: "top top", end: "+=280%", pin: true, scrub: 0.6 },
         })
         .to("[data-type]", { scale: 1.9, yPercent: -18, opacity: 0, ease: "power1.in" }, 0)
         .to("[data-sub]", { opacity: 0, y: -20 }, 0)

@@ -53,7 +53,7 @@ const StickyCard002 = ({
         scrollTrigger: {
           trigger: ".sticky-cards",
           start: "top top",
-          end: `+=${window.innerHeight * (totalCards - 1)}`,
+          end: `+=${window.innerHeight * 1.6 * (totalCards - 1)}`,
           pin: true,
           scrub: 0.5,
           pinSpacing: true,

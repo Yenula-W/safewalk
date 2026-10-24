@@ -45,7 +45,7 @@ export default function WatchOut() {
         scrollTrigger: {
           trigger: root.current,
           start: "top top",
-          end: () => `+=${distance() * 1.6}`,
+          end: () => `+=${distance() * 2.4}`,
           pin: true,
           scrub: 0.7,
           invalidateOnRefresh: true,

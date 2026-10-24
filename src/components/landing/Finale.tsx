@@ -13,7 +13,7 @@ export default function Finale() {
     () => {
       gsap
         .timeline({
-          scrollTrigger: { trigger: root.current, start: "top top", end: "+=200%", pin: true, scrub: 0.8 },
+          scrollTrigger: { trigger: root.current, start: "top top", end: "+=300%", pin: true, scrub: 0.8 },
         })
         .fromTo("[data-persp]", { rotateX: 42, y: window.innerWidth >= 768 ? 320 : 160, opacity: 0.3 }, { rotateX: 0, y: 0, opacity: 1, ease: "none" }, 0)
         .fromTo("[data-cta]", { opacity: 0, y: 30 }, { opacity: 1, y: 0, ease: "none" }, 0.6);
