@@ -4,6 +4,8 @@
 
 Built for [Neighborhood Hacks](https://neighborhoodhacks.org/), Safety & Emergency Response track.
 
+**Live:** https://safewalk-rho.vercel.app (landing page; the map is at `/app`)
+
 ## The problem
 
 Many students in Cypress, Texas walk to school, the bus stop or after-school jobs, often early in the morning or after dark. Crime in Cypress has recently risen sharply. <!-- TODO: add source, e.g. local police / news report with date and numbers --> On top of that, the walk itself carries everyday hazards: streetlights that are out, wide roads with no crosswalk, and sidewalks that just end. Nobody tracks these from a walker's point of view. City 311 systems take one report at a time, and you can't search them for a route.
